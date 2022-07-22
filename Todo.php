@@ -4,6 +4,10 @@
    if(isset($_POST['add'])){
     $title = $_POST['title'];
     $desc = $_POST['desc'];
+   if($title=="" || $desc==""){
+    header("Location:Todo.php?error=1");
+    die();
+   }
     $sql ="INSERT INTO `input`(`Title`, `Description`) VALUES ('$title','$desc')";
     mysqli_query($conn,$sql);
     header("Location:Todo.php");
@@ -18,6 +22,26 @@
     $clr = $_POST['clr'];
     $sql = "DELETE FROM `input`";
     mysqli_query($conn,$sql);
+   }
+   if(isset($_POST['updt'])){
+    $title = $_POST['title'];
+    $desc = $_POST['desc'];
+    $id = $_POST['update_id'];
+   if($title=="" || $desc==""){
+    header("Location:Todo.php?error=1");
+    die();
+   }
+    $sql ="UPDATE `input` SET `Title`='$title',`Description`='$desc' WHERE Id = $id";
+    mysqli_query($conn,$sql);
+    header("Location:Todo.php");
+   }
+   if(isset($_GET['edit_id'])){
+    $id= $_GET['edit_id'];
+    $fetch ="SELECT * FROM `input` WHERE Id = $id";
+    $query = mysqli_query($conn,$fetch);
+    $row = mysqli_fetch_assoc($query);
+    $uname = $row['Title'];
+    $sname = $row['Description'];
    }
 
 ?>
@@ -36,31 +60,56 @@
         <a class="navbar-brand " href="#">TODOs LIST</a>
         </div>
     </nav>
+<?php
+if(isset($_GET['error'])){
+    echo '<div class="alert alert-danger d-flex align-items-center" role="alert">
+      i am pliz add something
+    </div>';
+   }
+?>
  <div class="container-fluid bg-info">
     <div class="container">
             <form method="post">
-              <div class="mb-3">
-                  <label for="Title" class="form-label">Title</label>
-                  <input type="Title" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="title">
-                  <div id="emailHelp" class="form-text">Title add koro bhai gulo</div>
-              </div>
-              <div class="mb-3">
-                  <label for="Description" class="form-label">Description</label>
-                  <textarea class="form-control" id="description" rows="3" name="desc"></textarea>
-              </div>
-              <button type="submit" class="btn btn-primary" name="add">Add to list</button>
-              <button type="submit" class="btn btn-primary" name="clr">Clear List</button>
-                        </form>
-            <table class="table">
-            <thead>
-                <tr>
-                <th scope="col">Id</th>
-                <th scope="col">Title</th>
-                <th scope="col">Description</th>
-                <th scope="col">Action</th>
-                </tr>
-            </thead>
-          <?php
+<?php
+if(isset($_GET['edit_id'])){?>
+    <input type="hidden" name="update_id" value="<?php echo $_GET['edit_id']; ?>">
+<?php }?>
+<?php
+if(isset($_GET['edit_id'])){?>
+        <div class="mb-3">
+            <label for="Title" class="form-label">Title</label>
+            <input type="Title" class="form-control" id="exampleInputEmail1" value="<?php echo $uname ?>" aria-describedby="emailHelp" name="title">
+            <div id="emailHelp" class="form-text">Title add koro bhai gulo</div>
+        </div>
+        <div class="mb-3">
+            <label for="Description" class="form-label">Description</label>
+            <textarea type="text" class="form-control" id="description" rows="3" name="desc" value="<?php echo $sname ?>"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" name="updt">Update List</button>
+<?php }else{?>
+    <div class="mb-3">
+            <label for="Title" class="form-label">Title</label>
+            <input type="Title" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="title">
+            <div id="emailHelp" class="form-text">Title add koro bhai gulo</div>
+        </div>
+        <div class="mb-3">
+            <label for="Description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" rows="3" name="desc"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" name="add">Add to list</button>
+<?php }?>
+        <button type="submit" class="btn btn-primary" name="clr">Clear List</button>
+    </form>
+    <table class="table">
+    <thead>
+        <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Title</th>
+        <th scope="col">Description</th>
+        <th scope="col">Action</th>
+        </tr>
+    </thead>
+ <?php
     $fetch_sql = "SELECT * FROM `input`";
     $fetch_query =mysqli_query($conn,$fetch_sql);
     while($row=mysqli_fetch_assoc($fetch_query)){
@@ -69,7 +118,8 @@
                 <th scope="row">'.$row['Id'].'</th>
                 <td>'.$row['Title'].'</td>
                 <td>'.$row['Description'].'</td>
-                <td><a href="Todo.php?delete_id='.$row['Id'].'"><button class="btn btn-sm btn-primary" type="submit">Delete</button></a></td>
+                <td><a href="Todo.php?delete_id='.$row['Id'].'"><button class="btn btn-sm btn-primary" type="submit">Delete</button></a>
+                <a href="Todo.php?edit_id='.$row['Id'].'"><button class="btn btn-sm btn-primary" type="submit">Edit</button></a></td>
                 </tr>
             </tbody>';
     }
